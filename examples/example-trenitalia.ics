@@ -1,0 +1,26 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Events Calendar//iCal4j 1.0//EN
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+DTSTAMP:20131031T071858Z
+DTSTART:20131031T123100
+DTEND:20131031T150700
+SUMMARY:Viaggio Bolzano Bozen-Brescia\, Bolzano Bozen-Verona Porta Nuova:
+ Treno Regionale Veloce 2259\, Codice Biglietto XXXXXXXX \, Verona Porta 
+ Nuova-Brescia:Treno FrecciaBianca 9726\, Carr 9\, Posti 9B\, PNR XXXXXX\
+ ,  
+LOCATION:Bolzano Bozen
+UID:20131031T071858Z-1383219060000@fe80:0:0:0:92e2:baff:fe3e:5ab6%17
+PRIORITY:1
+DESCRIPTION:Bolzano Bozen-Brescia\;\nTreno: Regionale Veloce 2259\, parte
+ nza da Bolzano Bozen Ore: 12:31\; arrivo a Verona Porta Nuova Ore: 14:14
+ \nCodice Biglietto: XXXXXXXX\;\nTreno: FrecciaBianca 9726\, partenza da 
+ Verona Porta Nuova Ore: 14:32\; arrivo a Brescia Ore: 15:07\nCarroz 9\, 
+ Posti 9B\; codice pnr XXXXXX\n\n\n
+ATTENDEE;ROLE=REQ-PARTICIPANT;CN=BUYER:mailto:notimportant@example.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;CN=TRAVELLER:notimportant@example.com
+ORGANIZER;CN=ORGANIZER:mailto:webmaster@trenitalia.it
+END:VEVENT
+END:VCALENDAR
