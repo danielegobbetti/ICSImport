@@ -55,8 +55,8 @@ public class MainActivity extends Activity {
 		if (calendar != null) {
 
 			Iterator i = calendar.getComponents(Component.VEVENT).iterator();
-			//parse only the first event
-			if (i.hasNext()) {
+
+			while (i.hasNext()) {
 				VEvent event = (VEvent) i.next();
 
 				Intent insertIntent = new Intent(Intent.ACTION_INSERT)
