@@ -58,17 +58,27 @@ public class MainActivity extends Activity {
 			//parse only the first event
 			if (i.hasNext()) {
 				VEvent event = (VEvent) i.next();
-				//TODO: don't do all the conversions in place?
 
-				Intent InsertIntent = new Intent(Intent.ACTION_INSERT)
-					.setType("vnd.android.cursor.item/event")
-					.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartDate().getDate().getTime())
-					.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndDate().getDate().getTime())
-					.putExtra(CalendarContract.Events.TITLE, event.getSummary().getValue())
-					.putExtra(CalendarContract.Events.DESCRIPTION, event.getDescription().getValue())
-					.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation().getValue())
-					.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_PRIVATE);
-				startActivity(InsertIntent);
+				Intent insertIntent = new Intent(Intent.ACTION_INSERT)
+					.setType("vnd.android.cursor.item/event");
+
+				if (event.getStartDate() != null)
+					insertIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartDate().getDate().getTime());
+
+				if (event.getEndDate() != null)
+					insertIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndDate().getDate().getTime());
+
+				if (event.getSummary() != null)
+					insertIntent.putExtra(CalendarContract.Events.TITLE, event.getSummary().getValue());
+
+				if (event.getDescription() != null)
+					insertIntent.putExtra(CalendarContract.Events.DESCRIPTION, event.getDescription().getValue());
+
+				if (event.getLocation() != null) 
+					insertIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation().getValue());
+
+				insertIntent.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_PRIVATE);
+				startActivity(insertIntent);
 
 			}
 		}
