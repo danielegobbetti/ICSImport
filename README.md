@@ -12,8 +12,10 @@ The project should build as-is. Be aware that you need to use ant. The libraries
 TODO
 ====
 
+The following features have been tested and reported working but more feedback is welcome:
+* ICS files containing multiple events (tested with 15 events in the same file. Be aware that you need to go back after each event insertion). This feature was added in version 1.1
+
 At the moment the project needs testing. A lot of testing! Especially this aspects are currently untested:
 * Time Zone
 * Full-day events 
-* ICS files containing multiple events
 * ...
