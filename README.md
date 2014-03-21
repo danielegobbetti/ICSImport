@@ -1,7 +1,9 @@
 ICSImport
 =========
 
-ICSImport is a small free and open source app for Android that intercepts the VIEW intent for text/calendar files and allows to add it to the calendar. At the moment it does not need any calendar-related permissions because it acts as a bridge. The original .ics file is parsed and the event is added using the native calendar application. This way you are free to change the event details before saving.
+ICSImport is a small free and open source app for Android 2.1 and up that intercepts the VIEW intent for text/calendar files and allows to add it to the calendar. 
+At the moment it does not need any calendar-related permissions because it acts as a bridge. The original .ics file is parsed and the event is 
+added using the native calendar application. This way you are free to change the event details before saving.
 
 Building
 ========
