@@ -4,3 +4,6 @@
 /.project
 
 /.settings
+/.gradle
+/proguard
+/build
