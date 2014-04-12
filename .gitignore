@@ -1,2 +1,9 @@
 /bin
 /gen
+/.classpath
+/.project
+
+/.settings
+/.gradle
+/proguard
+/build

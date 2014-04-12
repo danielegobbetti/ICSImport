@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.dgtale.icsimport"
-    android:versionCode="2"
-    android:versionName="1.1" >
+    android:versionCode="3"
+    android:versionName="1.2" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="7"
         android:targetSdkVersion="19" />
 
     <application
         android:label="@string/app_name"
         android:allowBackup="true"
-	android:icon="@drawable/ic_launcher"
+		android:icon="@drawable/ic_launcher"
         android:theme="@android:style/Theme.NoDisplay">
         <activity
             android:name="org.dgtale.icsimport.MainActivity">
@@ -20,12 +20,34 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+				<action android:name="android.intent.action.EDIT"/>
+				<action android:name="android.intent.action.INSERT"/>
+								
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:mimeType="text/calendar" />
             </intent-filter>
 
+            <!-- according to http://en.wikipedia.org/wiki/ICalendar .ical or .icalendar fileextension are also used and not blocked by android -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+				<action android:name="android.intent.action.EDIT"/>
+				<action android:name="android.intent.action.INSERT"/>
+								
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:scheme="file"  />
+                <data android:scheme="http"  />
+                <data android:scheme="https"  />
+   				<!-- android does not allow to download *.ics-files via bluetooth but it works with other extensions. 
+   					according to http://en.wikipedia.org/wiki/ICalendar .ical and .icalendar are also used. -->
+                <data android:pathPattern=".*\\.ics" />
+                <data android:pathPattern=".*\\.ical" />
+                <data android:pathPattern=".*\\.icalendar" />
+   			</intent-filter>
+			
         </activity>
     </application>
-
-
 </manifest>

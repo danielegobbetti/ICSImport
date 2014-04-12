@@ -23,73 +23,151 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.CalendarContract;
+import android.util.Log;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.*;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
 
+//import android.provider.CalendarContract from android 4.0 is replaced by local CalendarContract so it is runnable from android 2.1 
 
 public class MainActivity extends Activity {
 
-    @Override
+	// see http://stackoverflow.com/questions/3721963/how-to-add-calendar-events-in-android
+    private static final String CONTENT_TYPE_EVENT = "vnd.android.cursor.item/event";
+	private static final String TAG = "ICS-Import";
+
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
 
-	Uri data = intent.getData();
+		Uri data = intent.getData();
+		
+		if (data != null) {
+			try {
+				Log.d(TAG, "opening " + data);
+				//use ical4j to parse the event
+				CalendarBuilder cb = new CalendarBuilder();
+				Calendar calendar = cb.build(getStreamFromOtherSource(data));
+		
+				if (calendar != null) {
+		
+					Iterator i = calendar.getComponents(Component.VEVENT).iterator();
+		
+					while (i.hasNext()) {
+						VEvent event = (VEvent) i.next();
+		
+						Log.d(TAG, "processing event " + event.getName());
 
-	try {
-		//use ical4j to parse the event
-		CalendarBuilder cb = new CalendarBuilder();
-		Calendar calendar = null;
-		calendar = cb.build(getStreamFromOtherSource(data));
+						Intent insertIntent = createEventIntent(event);
+						startActivity(insertIntent);
+		
+					}
+				}
+		
+			} catch (Exception e) {
+				Log.e(TAG, "error processing " + data + " : " + e);
+				e.printStackTrace();
+			}
+		}
+		Log.d(TAG, "done");
+		this.finish();
+    }
 
-		if (calendar != null) {
+	private Intent createEventIntent(VEvent event) {
+		Intent insertIntent = new Intent(Intent.ACTION_EDIT).setType(CONTENT_TYPE_EVENT);
+		addBeginEnd(insertIntent, event.getStartDate(), event.getEndDate(), event.getDuration());
+		if (event.getSummary() != null)
+			insertIntent.putExtra(CalendarContract.Events.TITLE, event.getSummary().getValue());
 
-			Iterator i = calendar.getComponents(Component.VEVENT).iterator();
+		if (event.getDescription() != null)
+			insertIntent.putExtra(CalendarContract.Events.DESCRIPTION, event.getDescription().getValue());
 
-			while (i.hasNext()) {
-				VEvent event = (VEvent) i.next();
+		if (event.getLocation() != null) 
+			insertIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation().getValue());
 
-				Intent insertIntent = new Intent(Intent.ACTION_INSERT)
-					.setType("vnd.android.cursor.item/event");
+		insertIntent.putExtra(CalendarContract.Events.ACCESS_LEVEL, getAccessLevel(event.getClassification()));
 
-				if (event.getStartDate() != null)
-					insertIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.getStartDate().getDate().getTime());
+		if (event.getUid() != null) {
+			insertIntent.putExtra(CalendarContract.Events.ORIGINAL_ID, event.getUid().getValue());
+			insertIntent.putExtra("event_id", event.getUid().getValue());
+		
+		}
+		// X-MICROSOFT-CDO-BUSYSTATUS:BUSY
 
-				if (event.getEndDate() != null)
-					insertIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.getEndDate().getDate().getTime());
+		
+		RRule rule = (RRule) event.getProperty(Property.RRULE);
+		if (rule != null) {
+			insertIntent.putExtra(CalendarContract.Events.RRULE, rule.getValue());
+		}
 
-				if (event.getSummary() != null)
-					insertIntent.putExtra(CalendarContract.Events.TITLE, event.getSummary().getValue());
+		return insertIntent;
+	}
 
-				if (event.getDescription() != null)
-					insertIntent.putExtra(CalendarContract.Events.DESCRIPTION, event.getDescription().getValue());
+	/**
+	 * Assumes allday if enddate is null or diff between end-start has 0 hours and 0 minutes.<br/>
+	 * calculates enddate from startdate+duration if neccessary.<br/>
+	 */
+    private void addBeginEnd(Intent insertIntent, DateProperty startDate,
+    		DateProperty endDate, Duration duration) {
+    	
+		boolean allDay = false;
+		if (startDate != null) {
+			insertIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startDate.getDate().getTime());
+			//insertIntent.putExtra(CalendarContract.Events.DTSTART, startDate.getDate().getTime());
 
-				if (event.getLocation() != null) 
-					insertIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, event.getLocation().getValue());
+			// calulate endDate from startDate+duration if neccessary
+			if ((endDate == null) && (duration != null)) {
+				Date start = startDate.getDate();
+				endDate = new DtEnd( start ); 
+			}
 
-				insertIntent.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_PRIVATE);
-				startActivity(insertIntent);
-
+			if ((endDate == null) && (duration == null)) { 
+				allDay = true;
+			}
+		}
+		
+		if (endDate != null) {
+			insertIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endDate.getDate().getTime());
+			// insertIntent.putExtra(CalendarContract.Events.DTEND, endDate.getDate().getTime());
+			if ((startDate != null)) {
+				if (isAllDay(new Dur(startDate.getDate(), endDate.getDate()))) {
+					allDay = true;					
+				}
 			}
 		}
 
-	} catch (Exception e) {
-		e.printStackTrace();
+		if (duration != null) {
+			insertIntent.putExtra(CalendarContract.Events.DURATION, duration.getValue());		
+		}
+
+		if (allDay) {
+			insertIntent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true);		
+		}
 	}
 
-    }
+	private boolean isAllDay(Dur duration) {
+		return duration.getHours() == 0 && duration.getMinutes() == 0;
+	}
 
-    protected InputStream getStreamFromOtherSource(Uri contentUri) throws FileNotFoundException {
+	private int getAccessLevel(Clazz clazz)
+	{
+		if (clazz == Clazz.CONFIDENTIAL) return CalendarContract.Events.ACCESS_DEFAULT;
+		if (clazz == Clazz.PUBLIC) return CalendarContract.Events.ACCESS_PUBLIC;
+		if (clazz == Clazz.PRIVATE) return CalendarContract.Events.ACCESS_PRIVATE;
+		return CalendarContract.Events.ACCESS_DEFAULT;
+	}
+	
+	protected InputStream getStreamFromOtherSource(Uri contentUri) throws FileNotFoundException {
 	//this helps in dealing with content:// URIs
 	    ContentResolver res = getApplicationContext().getContentResolver();
 	    Uri uri = Uri.parse(contentUri.toString());
