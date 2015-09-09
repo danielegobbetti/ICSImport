@@ -23,16 +23,17 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.CalendarContract;
+import android.widget.Toast;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.component.VEvent;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.Iterator;
 
 
@@ -85,19 +86,21 @@ public class MainActivity extends Activity {
 
 	} catch (Exception e) {
 		e.printStackTrace();
+		Toast.makeText(getBaseContext(), "Invalid ICS file", Toast.LENGTH_LONG).show();
 	}
+	finish();
 
     }
 
-    protected InputStream getStreamFromOtherSource(Uri contentUri) throws FileNotFoundException {
-	//this helps in dealing with content:// URIs
+    protected FileInputStream getStreamFromOtherSource(Uri contentUri) throws FileNotFoundException {
 	    ContentResolver res = getApplicationContext().getContentResolver();
-	    Uri uri = Uri.parse(contentUri.toString());
-	    InputStream is;
+	    ParcelFileDescriptor inputAssetFileDescriptor = null;
+	    FileInputStream is = null;
 	    try {
-		    is = res.openInputStream(uri);
+		    inputAssetFileDescriptor = res.openFileDescriptor(contentUri, "r");
+		    is = new FileInputStream(inputAssetFileDescriptor.getFileDescriptor());;
 	    } catch (FileNotFoundException e) {
-		    is = new ByteArrayInputStream(new byte[0]);
+		    e.printStackTrace();
 	    }
 	    return is;
     }
