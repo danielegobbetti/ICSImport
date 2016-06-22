@@ -6,7 +6,7 @@ ICSImport is a small free and open source app for Android that intercepts the VI
 Building
 ========
 
-The project should build as-is. Be aware that you need to use ant. The libraries contained in this project are taken from the [ical4j project](http://ical4j.sf.net/).
+The project should build as-is. Be aware that you need to use ant. The libraries contained in this project are taken from the [ical4j project](https://github.com/ical4j/ical4j).
 
 
 TODO
